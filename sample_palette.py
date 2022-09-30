@@ -97,8 +97,7 @@ for idx, book in enumerate(data):
                     closest_colors = get_neighbour_color(colors[0])
 
         data[idx]['color_palette'] = [
-            {'primary1': f"rgb({stringify_list(colors[0])})"},
-            {'primary2': f"rgb({stringify_list(closest_colors)})"},
+            {'gradient': f"linear-gradient(315deg,rgb({stringify_list(colors[0])}) 0%,rgb({stringify_list(closest_colors)}) 100%)"},
             {'accent': f"rgb({stringify_list(farthest_colors)})"}
         ]
 
@@ -107,6 +106,11 @@ for idx, book in enumerate(data):
     except:
         errors.append(image_path)
         print("Failed to read image!")
+        
+        data[idx]['color_palette'] = [
+            {'gradient': "linear-gradient(315deg,rgb(142, 158, 171) 0%,rgb(189, 195, 199) 100%)"},
+            {'accent': "rgb(255, 255, 255)"}
+        ]
 
 print(f"Stats: {len(data) - len(errors)} completed, {len(errors)} errors")
 
