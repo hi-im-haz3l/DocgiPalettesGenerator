@@ -2,6 +2,8 @@ from email import header
 import json
 import requests
 import os
+import base64
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,18 +11,50 @@ load_dotenv()
 ENV_API_SECRET = os.getenv('API_SECRET')
 
 if not ENV_API_SECRET:
-    raise TypeError("A valid API credential is required!")
+    raise TypeError("A valid API secret is required!")
 
-api_endpoint = "http://10.0.0.2:3000/api/books-dump"
+ENV_API_ENDPOINT = os.getenv('API_ENDPOINT')
+
+if not ENV_API_ENDPOINT:
+    raise TypeError("A valid API enpoint is required!")
+
+errors = []
 
 header = {"x-api-key": ENV_API_SECRET}
 
-book_details = {"title":"Phép tính của một nho sĩ","author":"Trần Vũ","publisher":"Hội nhà văn","image_urls":["http://static.nhanam.com.vn/thumb/0x0/crop/Books/Images/2019/2/25/WPCVSY9L.jpg"],"image_paths":["images/f3eab5a1b5322f60d1ccb57e77f4262ad24d5fc8.jpg"],"color_palette":[{"primary1":"rgb(162, 101, 49)"},{"primary2":"rgb(122, 75, 41)"},{"accent":"rgb(234, 203, 153)"}]}
+with open(f'./manifest.json', 'r', encoding="utf8") as f:
+    data = json.load(f)
 
-cover_image = {"cover_image": ('f3eab5a1b5322f60d1ccb57e77f4262ad24d5fc8.jpg', open(book_details['image_paths'][0], "rb"), 'image/jpeg')}
+for idx, book in enumerate(data):
+    cover_path = book['image_paths'][0]
+    
+    try:
+        with open(cover_path, "rb") as img_file:
+            b64_string = base64.b64encode(img_file.read())
 
-response = requests.post(api_endpoint, headers=header, data=book_details, files=cover_image)
+        book_details = json.dumps({
+            "title": book['title'],
+            "author": book['author'],
+            "publisher": book['publisher'],
+            "color_palette": book['color_palette'],
+            "cover_image": "data:image/webp;base64," + b64_string.decode('utf-8')
+        })
 
-print(response.json())
+        response = requests.post(ENV_API_ENDPOINT, headers=header, json=book_details)
 
-print(response.status_code)
+        if (response.status_code != 200):
+            errors.append(f"API: {response.status_code} - {response.json()} | {book['title']}")
+            print(f"{response.status_code} - {response.json()}")
+
+    except:
+        errors.append(book['title'])
+        print("Failed to read book!")
+
+    print(f"Progress: {idx+1}/{len(data)}")
+    time.sleep(.1)
+
+
+print(f"Stats: {len(data) - len(errors)} completed, {len(errors)} errors")
+
+for i, error in enumerate(errors):
+    print(f"Error ({i}): {error}")

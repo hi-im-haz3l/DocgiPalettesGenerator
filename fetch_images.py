@@ -14,15 +14,19 @@ with open(f'./{input_path}', 'r', encoding="utf8") as f:
 for idx, book in enumerate(data):
     cover_path = book['image_paths'][0]
 
-    response = requests.get(book['image_urls'][0])
-    # open(cover_path, "wb").write(response.content)
+    try:
+        response = requests.get(book['image_urls'][0])
+        # open(cover_path, "wb").write(response.content)
 
-    image = Image.open(BytesIO(response.content))
-    image = image.convert('RGB')
+        image = Image.open(BytesIO(response.content))
+        image = image.convert('RGB')
 
-    book['image_paths'][0] = f"images/{os.path.basename(cover_path).split('.', 1)[0]}.webp"
-    image.save(book['image_paths'][0], 'webp')
+        book['image_paths'][0] = f"images/{os.path.basename(cover_path).split('.', 1)[0]}.webp"
+        image.save(book['image_paths'][0], 'webp')
 
+    except:
+        errors.append(cover_path)
+        print("Failed to fetch image!")
 
     print(f"Progress: {idx+1}/{len(data)}")
 

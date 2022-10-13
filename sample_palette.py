@@ -96,10 +96,10 @@ for idx, book in enumerate(data):
                 if (smallest_delta_e > accent_delta_e):
                     closest_colors = get_neighbour_color(colors[0])
 
-        data[idx]['color_palette'] = [
-            {'gradient': f"linear-gradient(315deg,rgb({stringify_list(colors[0])}) 0%,rgb({stringify_list(closest_colors)}) 100%)"},
-            {'accent': f"rgb({stringify_list(farthest_colors)})"}
-        ]
+        data[idx]['color_palette'] = {
+            'gradient': f"linear-gradient(315deg,rgb({stringify_list(colors[0])}) 0%,rgb({stringify_list(closest_colors)}) 100%)",
+            'accent': f"rgb({stringify_list(farthest_colors)})"
+        }
 
         print(f"Progress: {idx+1}/{len(data)}")
 
@@ -107,10 +107,10 @@ for idx, book in enumerate(data):
         errors.append(image_path)
         print("Failed to read image!")
         
-        data[idx]['color_palette'] = [
-            {'gradient': "linear-gradient(315deg,rgb(142, 158, 171) 0%,rgb(189, 195, 199) 100%)"},
-            {'accent': "rgb(255, 255, 255)"}
-        ]
+        data[idx]['color_palette'] = {
+            'gradient': "linear-gradient(315deg,rgba(142, 158, 171) 0%,rgba(189, 195, 199) 100%)",
+            'accent': "rgb(255, 255, 255)"
+        }
 
 print(f"Stats: {len(data) - len(errors)} completed, {len(errors)} errors")
 
